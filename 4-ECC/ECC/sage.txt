@@ -1,0 +1,34 @@
+p = 0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff
+a = -3
+b = 0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b
+E = EllipticCurve(Zmod(p), (a, b))
+
+q = 0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551 # eq. n (ordre)
+
+# (a) Comproveu que el nombre de punts (ordre) de la corba que es fa servir al certificat és primer.
+print("(a):", is_prime(q))
+
+# (b) Comproveu que la clau pública P de www.wikipedia.org és realment un punt de la corba.
+Px = 0xdedb39245f4d61ed2e9b2f892c9d2e7b9d56283c2e4feb71cf410839b825e15a
+Py = 0x175d2cb9e5def9e95e17028dd3e6a7a4b42542c4a98e134b4d0a50356e6f67b3
+print("(b):", [Px,Py] in E)
+
+# (c) Calculeu l’ordre del punt P .
+P = E(Px,Py)
+print("(c):", P.order())
+
+# (d) Comproveu que la signatura ECDSA és correcta.
+f1 = 0x00c5581c8fc4087eb656a0bab9b11b835e535dfcf77100a85d4341f54806abc432
+f2 = 0x00a216e731445535e7f28b380674c3a40ec0398fd464ce1ca0534d76d1a66296bf
+
+Gx = 0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296
+Gy = 0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5
+G = E(Gx,Gy)
+
+mensaje = 0x213de96e0297454748d543c43e5e80e01aafbb8392a39f34b30278e9ded70102
+
+w1 = mensaje * f2^(-1) % q
+w2 = f1 * f2^(-1) % q
+
+X = w1*G + w2*P
+print("(d):", int(X[0]) % q == f1)
